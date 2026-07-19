@@ -3,109 +3,258 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="使用 OpenCode 建立的地震目錄與最小完整規模 Mc 互動教學網站">
-  <title>OpenCode 地震研究實驗室</title>
+  <meta name="description" content="OpenCode CLI 繁體中文教學：安裝、TUI、CLI、agents、commands 與地震研究案例">
+  <title>OpenCode CLI 地震研究實作指南</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="hero">
+  <header class="hero" id="top">
     <nav class="nav wrap">
       <a class="brand" href="#top">OpenCode × Seismology</a>
       <div class="nav-links">
-        <a href="#dashboard">互動分析</a>
-        <a href="#workflow">研究流程</a>
-        <a href="#prompts">OpenCode Prompts</a>
+        <a href="#start">快速開始</a>
+        <a href="#cli">CLI 指令</a>
+        <a href="#workflow">工作流程</a>
+        <a href="#examples">實際案例</a>
         <a href="https://github.com/oceanicdayi/Learning_opencode">GitHub</a>
       </div>
     </nav>
-    <div class="hero-content wrap" id="top">
-      <p class="eyebrow">REPRODUCIBLE SEISMOLOGY LAB</p>
-      <h1>用 OpenCode 處理地震資料、撰寫論文與部署互動網站</h1>
-      <p class="lead">第一版示範每月計算一次最小完整規模 Mc，採用 3 個月移動時間窗，並將 Python 分析結果自動部署到 GitHub Pages。</p>
+
+    <div class="hero-content wrap">
+      <p class="eyebrow">TERMINAL AI CODING AGENT</p>
+      <h1>OpenCode CLI<br>地震研究實作指南</h1>
+      <p class="lead">從安裝、模型連線、Plan／Build、CLI 自動化，到地震資料處理、科學論文、監測系統與 GitHub Pages。每個案例都提供可直接複製的指令與 prompt。</p>
       <div class="hero-actions">
-        <a class="button primary" href="#dashboard">查看互動分析</a>
-        <a class="button ghost" href="https://github.com/oceanicdayi/Learning_opencode">檢視原始碼</a>
+        <a class="button primary" href="#start">開始學習</a>
+        <a class="button ghost" href="https://github.com/oceanicdayi/Learning_opencode/blob/main/docs/OPENCODE_GUIDE.md">閱讀完整指南</a>
       </div>
-      <div class="notice" id="data-notice">正在載入資料說明…</div>
+      <div class="terminal hero-terminal">
+        <div class="terminal-bar"><span></span><span></span><span></span><b>terminal</b></div>
+        <pre><code>git clone https://github.com/oceanicdayi/Learning_opencode.git
+cd Learning_opencode
+opencode
+
+# 進入 TUI 後
+/connect
+/init</code></pre>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="section wrap" id="dashboard">
+    <section class="section wrap" id="start">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">LIVE DEMO</p>
-          <h2>地震目錄與 Mc 儀表板</h2>
+          <p class="eyebrow">QUICK START</p>
+          <h2>十分鐘開始使用 OpenCode</h2>
         </div>
-        <span class="status" id="load-status">載入中</span>
+        <span class="pill">繁體中文實作</span>
       </div>
 
-      <div class="metrics" aria-live="polite">
-        <article class="metric"><span>事件數</span><strong id="event-count">—</strong><small id="date-range">—</small></article>
-        <article class="metric"><span>全目錄 MAXC Mc</span><strong id="overall-mc">—</strong><small>bin width = 0.1</small></article>
-        <article class="metric"><span>最新移動窗 Mc</span><strong id="latest-mc">—</strong><small id="latest-samples">—</small></article>
-        <article class="metric"><span>規模範圍</span><strong id="magnitude-range">—</strong><small>合成示範資料</small></article>
+      <div class="steps four">
+        <article><span>01</span><h3>安裝</h3><p>使用官方安裝腳本，或透過 npm 安裝。</p></article>
+        <article><span>02</span><h3>連接模型</h3><p>進入 TUI 後用 <code>/connect</code> 設定 provider。</p></article>
+        <article><span>03</span><h3>初始化專案</h3><p>執行 <code>/init</code>，建立專案級 <code>AGENTS.md</code>。</p></article>
+        <article><span>04</span><h3>先 Plan 再 Build</h3><p>先分析風險與修改範圍，再授權 agent 實作。</p></article>
       </div>
 
-      <div class="dashboard-grid">
-        <article class="panel wide">
-          <div class="panel-header">
-            <div><h3>Mc 隨時間變化</h3><p>每月計算一次；每個點使用前 3 個月事件。</p></div>
-          </div>
-          <svg id="mc-chart" class="chart" role="img" aria-label="最小完整規模隨時間變化圖"></svg>
+      <div class="code-grid">
+        <article class="code-card">
+          <div class="code-head"><h3>Linux／macOS／Termux</h3><button class="copy" data-copy="install">複製</button></div>
+          <pre id="install"><code>curl -fsSL https://opencode.ai/install | bash
+opencode --version
+opencode --help</code></pre>
         </article>
-
-        <article class="panel">
-          <div class="panel-header">
-            <div><h3>規模頻度分布</h3><p>非累積事件數與累積事件數。</p></div>
-          </div>
-          <svg id="frequency-chart" class="chart" role="img" aria-label="規模頻度分布圖"></svg>
-        </article>
-
-        <article class="panel">
-          <div class="panel-header">
-            <div><h3>事件空間分布</h3><p>拖曳門檻，篩選地圖中的事件。</p></div>
-          </div>
-          <label class="slider-label" for="magnitude-filter">最低規模：<strong id="filter-value">0.0</strong></label>
-          <input id="magnitude-filter" type="range" min="0" max="6" value="0" step="0.1">
-          <p class="filter-summary" id="filter-summary">—</p>
-          <svg id="event-map" class="map" role="img" aria-label="臺灣附近合成地震事件分布"></svg>
+        <article class="code-card">
+          <div class="code-head"><h3>npm 安裝</h3><button class="copy" data-copy="npm-install">複製</button></div>
+          <pre id="npm-install"><code>npm install -g opencode-ai
+opencode --version</code></pre>
         </article>
       </div>
     </section>
 
-    <section class="section alt" id="workflow">
+    <section class="section alt" id="cli">
       <div class="wrap">
-        <p class="eyebrow">RESEARCH PIPELINE</p>
-        <h2>從資料到網站的可重現流程</h2>
-        <div class="steps">
-          <article><span>01</span><h3>資料產生／匯入</h3><p>以固定亂數種子建立教學資料；真實研究時替換為正式 catalog。</p></article>
-          <article><span>02</span><h3>科學計算</h3><p>Python 模組執行 MAXC、規模頻度分布與每月 3 個月移動窗。</p></article>
-          <article><span>03</span><h3>自動測試</h3><p>針對 bin、tie handling 與時間窗建立 unittest，避免方法被改壞。</p></article>
-          <article><span>04</span><h3>資料發布</h3><p>分析結果輸出為 JSON，前端只負責視覺化，不在瀏覽器內重算科學結果。</p></article>
-          <article><span>05</span><h3>GitHub Pages</h3><p>每次 main 更新後由 Actions 重建資料、測試並部署網站。</p></article>
+        <p class="eyebrow">CLI CHEAT SHEET</p>
+        <h2>最常用的 OpenCode 指令</h2>
+        <p class="section-intro">沒有參數的 <code>opencode</code> 會啟動 TUI；<code>opencode run</code> 適合一次性任務、腳本與自動化。</p>
+
+        <div class="command-list">
+          <article><code>opencode</code><div><h3>啟動 TUI</h3><p>互動閱讀、規劃、修改與檢查 repository。</p></div></article>
+          <article><code>opencode -c</code><div><h3>延續最近 session</h3><p>接續上一次研究或程式工作。</p></div></article>
+          <article><code>opencode run "..."</code><div><h3>非互動執行</h3><p>適合 QC 報告、批次審查與自動化。</p></div></article>
+          <article><code>opencode run -f FILE "..."</code><div><h3>附加檔案</h3><p>把 catalog、manuscript 或 workflow 加入 prompt。</p></div></article>
+          <article><code>opencode models</code><div><h3>列出模型</h3><p>找到可用的 <code>provider/model</code> 名稱。</p></div></article>
+          <article><code>opencode agent list</code><div><h3>列出 agents</h3><p>確認 Plan、Build 與專案 subagents。</p></div></article>
+          <article><code>opencode session list</code><div><h3>管理 sessions</h3><p>尋找過去對話並延續研究決策。</p></div></article>
+          <article><code>opencode stats</code><div><h3>查看成本與用量</h3><p>比較模型、工具與專案使用狀況。</p></div></article>
+          <article><code>opencode serve</code><div><h3>Headless server</h3><p>讓多次 run 共用 backend，適合自動化。</p></div></article>
+          <article><code>opencode web</code><div><h3>Web UI</h3><p>用瀏覽器或手機操作 OpenCode。</p></div></article>
+          <article><code>opencode github install</code><div><h3>GitHub agent</h3><p>安裝 repository 自動化 workflow。</p></div></article>
+          <article><code>opencode upgrade</code><div><h3>更新版本</h3><p>升級到最新或指定版本。</p></div></article>
+        </div>
+
+        <div class="code-grid three">
+          <article class="code-card">
+            <div class="code-head"><h3>快速問答</h3><button class="copy" data-copy="run-basic">複製</button></div>
+            <pre id="run-basic"><code>opencode run \
+  "說明這個 repository 的結構、資料流與測試方式"</code></pre>
+          </article>
+          <article class="code-card">
+            <div class="code-head"><h3>指定 Plan agent</h3><button class="copy" data-copy="run-plan">複製</button></div>
+            <pre id="run-plan"><code>opencode run --agent plan \
+  "閱讀 AGENTS.md；規劃地震目錄 QC，不修改檔案"</code></pre>
+          </article>
+          <article class="code-card">
+            <div class="code-head"><h3>附加地震目錄</h3><button class="copy" data-copy="run-file">複製</button></div>
+            <pre id="run-file"><code>opencode run \
+  -f data/sample/catalog.csv \
+  "檢查欄位、缺值、重複事件與異常值"</code></pre>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="section wrap" id="prompts">
-      <p class="eyebrow">OPENCODE WORKFLOW</p>
-      <h2>可直接使用的任務提示</h2>
-      <div class="prompt-grid">
-        <article class="prompt-card"><h3>地震資料品質檢查</h3><pre><code>閱讀 AGENTS.md。先檢查 catalog 的時間、經緯度、深度、規模、缺值與重複事件。先報告問題與預計修改檔案，不要直接改資料。</code></pre></article>
-        <article class="prompt-card"><h3>科學論文 Methods</h3><pre><code>只根據 src、configs 與 outputs 撰寫 Methods。不得補寫不存在的步驟；未驗證引用標成 [AUTHOR CHECK]。</code></pre></article>
-        <article class="prompt-card"><h3>Reviewer 式審查</h3><pre><code>以 SRL reviewer 角度檢查資料洩漏、空間偏差、時間窗可比性、樣本數、方法限制與過度宣稱。只提出可執行問題，不修改正文。</code></pre></article>
-        <article class="prompt-card"><h3>建立新功能</h3><pre><code>先閱讀測試與資料 schema，提出計畫及風險。完成後執行測試，列出修改檔案、命令、結果與尚未解決限制。</code></pre></article>
+    <section class="section wrap" id="tui">
+      <p class="eyebrow">TUI COMMANDS</p>
+      <h2>在 OpenCode 畫面內輸入的指令</h2>
+      <div class="tui-grid">
+        <article><code>/connect</code><p>連接模型 provider。</p></article>
+        <article><code>/init</code><p>掃描專案並建立或補充 AGENTS.md。</p></article>
+        <article><code>/help</code><p>顯示指令與快捷鍵。</p></article>
+        <article><code>/undo</code><p>撤銷最近一次 OpenCode 變更。</p></article>
+        <article><code>/redo</code><p>重做剛才撤銷的變更。</p></article>
+        <article><code>@檔案</code><p>模糊搜尋並加入 repository 檔案。</p></article>
+        <article><code>@seismic-data</code><p>呼叫地震資料 subagent。</p></article>
+        <article><code>/calculate-mc</code><p>執行本專案 Mc 工作流程。</p></article>
+        <article><code>/review-manuscript</code><p>執行 SRL reviewer 式審查。</p></article>
+        <article><code>/build-dashboard</code><p>更新互動網站與部署流程。</p></article>
+      </div>
+    </section>
+
+    <section class="section dark" id="workflow">
+      <div class="wrap">
+        <p class="eyebrow">SAFE WORKFLOW</p>
+        <h2>Plan → Build → Review → Test</h2>
+        <div class="workflow-grid">
+          <article><span>PLAN</span><h3>先理解，不修改</h3><p>請 agent 列出現況、科學假設、風險、修改檔案與驗證方法。</p></article>
+          <article><span>BUILD</span><h3>一次只做一個小步驟</h3><p>建立函式、schema 或 tests，避免一次生成整個系統。</p></article>
+          <article><span>REVIEW</span><h3>使用唯讀 reviewer</h3><p>檢查資料洩漏、單位、時間窗、偏差與過度宣稱。</p></article>
+          <article><span>TEST</span><h3>讓結果可重現</h3><p>執行 tests、資料重建與 diff 檢查，最後才 commit／push。</p></article>
+        </div>
+
+        <article class="prompt-example">
+          <div class="code-head"><h3>高品質 Prompt 模板</h3><button class="copy" data-copy="prompt-template">複製</button></div>
+          <pre id="prompt-template"><code>閱讀 AGENTS.md 與相關檔案。
+
+目標：完成一個單一、可驗證的任務。
+輸入：列出資料路徑、schema、時間範圍與單位。
+限制：不修改 data/raw；不捏造資料、結果或引用；先規劃再修改；不 push。
+輸出：指定程式、CSV、JSON、圖或 Markdown 報告。
+驗證：tests、邊界案例、指標與人工檢查。
+
+完成後回報：
+1. 修改檔案
+2. 執行命令
+3. 測試結果
+4. 科學假設
+5. 未解決限制</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section wrap" id="examples">
+      <p class="eyebrow">REAL EXAMPLES</p>
+      <h2>四個地震研究實際案例</h2>
+      <div class="example-grid">
+        <article class="example-card">
+          <div class="number">01</div>
+          <h3>處理地震資料</h3>
+          <p>檢查 catalog schema、時間、經緯度、深度、規模、缺值、重複事件，再審查 MAXC 與移動窗。</p>
+          <pre><code>@seismic-data
+閱讀 data/sample/catalog.csv 與 completeness.py。
+先完成 QC，不修改原始資料。
+檢查 MAXC binning、tie handling、3 個月移動窗與低樣本標記。
+完成後執行 tests。</code></pre>
+        </article>
+
+        <article class="example-card">
+          <div class="number">02</div>
+          <h3>撰寫科學論文</h3>
+          <p>先建立 evidence matrix，再由 writer 撰寫，最後用唯讀 reviewer 挑戰論述。</p>
+          <pre><code>@manuscript-writer
+只根據 src、configs、tests 與 outputs 撰寫 Methods。
+不得補寫不存在的方法；未驗證引用標成 [AUTHOR CHECK]。</code></pre>
+        </article>
+
+        <article class="example-card">
+          <div class="number">03</div>
+          <h3>建置監測系統</h3>
+          <p>把 Raspberry Pi 系統拆成資料接收、buffer、QC、震度、輸出、監控與斷線恢復。</p>
+          <pre><code>使用 Plan agent 規劃 Raspberry Pi 地震監測 MVP：
+連續波形、ring buffer、每秒震度、gap handling、
+斷線恢復、健康監測與中央端 JSON。
+先規劃，不寫程式。</code></pre>
+        </article>
+
+        <article class="example-card">
+          <div class="number">04</div>
+          <h3>互動網頁與 GitHub Pages</h3>
+          <p>Python 產生科學結果 JSON，前端只負責視覺化，再用 Actions 測試與發布。</p>
+          <pre><code>/build-dashboard
+新增逐秒震度時間序列頁面。
+保持手機友善；不在瀏覽器重新計算科學結果；
+完成後執行 tests 與靜態檔案檢查。</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section alt" id="automation">
+      <div class="wrap">
+        <p class="eyebrow">AUTOMATION</p>
+        <h2>用 CLI 建立可重複的研究工作</h2>
+        <div class="code-grid">
+          <article class="code-card">
+            <div class="code-head"><h3>批次輸出 QC JSON</h3><button class="copy" data-copy="qc-json">複製</button></div>
+            <pre id="qc-json"><code>mkdir -p outputs
+opencode run \
+  --agent seismic-data \
+  -f data/sample/catalog.csv \
+  --format json \
+  "只做資料品質檢查，不修改檔案" \
+  &gt; outputs/catalog-qc.jsonl</code></pre>
+          </article>
+          <article class="code-card">
+            <div class="code-head"><h3>共用 Headless server</h3><button class="copy" data-copy="serve">複製</button></div>
+            <pre id="serve"><code># Terminal A
+opencode serve --port 4096
+
+# Terminal B
+opencode run --attach http://localhost:4096 \
+  "檢查 tests 是否覆蓋 Mc 邊界條件"</code></pre>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap final-cta">
+      <p class="eyebrow">NEXT STEP</p>
+      <h2>從一個小而可驗證的任務開始</h2>
+      <p>建議第一個練習：啟動 OpenCode，使用 Plan agent 解釋 <code>src/seismo/completeness.py</code>，再請 Build agent 新增一個邊界測試。</p>
+      <div class="hero-actions light-actions">
+        <a class="button primary" href="https://github.com/oceanicdayi/Learning_opencode/blob/main/docs/OPENCODE_GUIDE.md">完整 CLI 指南</a>
+        <a class="button outline" href="https://github.com/oceanicdayi/Learning_opencode">開啟 Repository</a>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="wrap footer-content">
-      <p>Learning OpenCode for Seismology · 教學與研究流程示範</p>
-      <p>MAXC 結果不應單獨作為正式 catalog completeness 結論。</p>
+      <p>Learning OpenCode for Seismology</p>
+      <p>CLI、agents、commands 與可重現地震研究範例</p>
     </div>
   </footer>
+
   <script src="app.js" defer></script>
 </body>
 </html>
