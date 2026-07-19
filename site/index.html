@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="使用 OpenCode 建立的地震目錄與最小完整規模 Mc 互動教學網站">
+  <title>OpenCode 地震研究實驗室</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav wrap">
+      <a class="brand" href="#top">OpenCode × Seismology</a>
+      <div class="nav-links">
+        <a href="#dashboard">互動分析</a>
+        <a href="#workflow">研究流程</a>
+        <a href="#prompts">OpenCode Prompts</a>
+        <a href="https://github.com/oceanicdayi/Learning_opencode">GitHub</a>
+      </div>
+    </nav>
+    <div class="hero-content wrap" id="top">
+      <p class="eyebrow">REPRODUCIBLE SEISMOLOGY LAB</p>
+      <h1>用 OpenCode 處理地震資料、撰寫論文與部署互動網站</h1>
+      <p class="lead">第一版示範每月計算一次最小完整規模 Mc，採用 3 個月移動時間窗，並將 Python 分析結果自動部署到 GitHub Pages。</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#dashboard">查看互動分析</a>
+        <a class="button ghost" href="https://github.com/oceanicdayi/Learning_opencode">檢視原始碼</a>
+      </div>
+      <div class="notice" id="data-notice">正在載入資料說明…</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section wrap" id="dashboard">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LIVE DEMO</p>
+          <h2>地震目錄與 Mc 儀表板</h2>
+        </div>
+        <span class="status" id="load-status">載入中</span>
+      </div>
+
+      <div class="metrics" aria-live="polite">
+        <article class="metric"><span>事件數</span><strong id="event-count">—</strong><small id="date-range">—</small></article>
+        <article class="metric"><span>全目錄 MAXC Mc</span><strong id="overall-mc">—</strong><small>bin width = 0.1</small></article>
+        <article class="metric"><span>最新移動窗 Mc</span><strong id="latest-mc">—</strong><small id="latest-samples">—</small></article>
+        <article class="metric"><span>規模範圍</span><strong id="magnitude-range">—</strong><small>合成示範資料</small></article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="panel wide">
+          <div class="panel-header">
+            <div><h3>Mc 隨時間變化</h3><p>每月計算一次；每個點使用前 3 個月事件。</p></div>
+          </div>
+          <svg id="mc-chart" class="chart" role="img" aria-label="最小完整規模隨時間變化圖"></svg>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div><h3>規模頻度分布</h3><p>非累積事件數與累積事件數。</p></div>
+          </div>
+          <svg id="frequency-chart" class="chart" role="img" aria-label="規模頻度分布圖"></svg>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div><h3>事件空間分布</h3><p>拖曳門檻，篩選地圖中的事件。</p></div>
+          </div>
+          <label class="slider-label" for="magnitude-filter">最低規模：<strong id="filter-value">0.0</strong></label>
+          <input id="magnitude-filter" type="range" min="0" max="6" value="0" step="0.1">
+          <p class="filter-summary" id="filter-summary">—</p>
+          <svg id="event-map" class="map" role="img" aria-label="臺灣附近合成地震事件分布"></svg>
+        </article>
+      </div>
+    </section>
+
+    <section class="section alt" id="workflow">
+      <div class="wrap">
+        <p class="eyebrow">RESEARCH PIPELINE</p>
+        <h2>從資料到網站的可重現流程</h2>
+        <div class="steps">
+          <article><span>01</span><h3>資料產生／匯入</h3><p>以固定亂數種子建立教學資料；真實研究時替換為正式 catalog。</p></article>
+          <article><span>02</span><h3>科學計算</h3><p>Python 模組執行 MAXC、規模頻度分布與每月 3 個月移動窗。</p></article>
+          <article><span>03</span><h3>自動測試</h3><p>針對 bin、tie handling 與時間窗建立 unittest，避免方法被改壞。</p></article>
+          <article><span>04</span><h3>資料發布</h3><p>分析結果輸出為 JSON，前端只負責視覺化，不在瀏覽器內重算科學結果。</p></article>
+          <article><span>05</span><h3>GitHub Pages</h3><p>每次 main 更新後由 Actions 重建資料、測試並部署網站。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="prompts">
+      <p class="eyebrow">OPENCODE WORKFLOW</p>
+      <h2>可直接使用的任務提示</h2>
+      <div class="prompt-grid">
+        <article class="prompt-card"><h3>地震資料品質檢查</h3><pre><code>閱讀 AGENTS.md。先檢查 catalog 的時間、經緯度、深度、規模、缺值與重複事件。先報告問題與預計修改檔案，不要直接改資料。</code></pre></article>
+        <article class="prompt-card"><h3>科學論文 Methods</h3><pre><code>只根據 src、configs 與 outputs 撰寫 Methods。不得補寫不存在的步驟；未驗證引用標成 [AUTHOR CHECK]。</code></pre></article>
+        <article class="prompt-card"><h3>Reviewer 式審查</h3><pre><code>以 SRL reviewer 角度檢查資料洩漏、空間偏差、時間窗可比性、樣本數、方法限制與過度宣稱。只提出可執行問題，不修改正文。</code></pre></article>
+        <article class="prompt-card"><h3>建立新功能</h3><pre><code>先閱讀測試與資料 schema，提出計畫及風險。完成後執行測試，列出修改檔案、命令、結果與尚未解決限制。</code></pre></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-content">
+      <p>Learning OpenCode for Seismology · 教學與研究流程示範</p>
+      <p>MAXC 結果不應單獨作為正式 catalog completeness 結論。</p>
+    </div>
+  </footer>
+  <script src="app.js" defer></script>
+</body>
+</html>
